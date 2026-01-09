@@ -96,17 +96,20 @@ export default function AttemptQuiz() {
     }
 
     if (submitted && quizResult) {
+        console.log("quiz result");
+        console.log(quizResult);
+        const score = quizResult.score || 0;
+        const totalQuestions = currentQuiz?.questions?.length || quizResult.total_questions || 0;
+        const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+        
         return (
             <Container className="mt-4">
                 <Card>
                     <Card.Body>
                         <h3 className="text-center mb-4">Quiz Results</h3>
-                        <Alert variant={quizResult.score_percentage >= 70 ? "success" : "warning"}>
-                            <h4>Your Score: {quizResult.score || quizResult.total_score || 0}</h4>
-                            <p>Percentage: {quizResult.score_percentage || quizResult.percentage || 0}%</p>
-                            {quizResult.total_questions && (
-                                <p>Total Questions: {quizResult.total_questions}</p>
-                            )}
+                        <Alert variant={percentage >= 70 ? "success" : "warning"}>
+                            <h4>Your Score: {score} / {totalQuestions}</h4>
+                            <p>Percentage: {percentage}%</p>
                         </Alert>
                         <div className="text-center">
                             <Button variant="primary" onClick={handleBack}>
