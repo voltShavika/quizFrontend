@@ -7,9 +7,15 @@ export const loginUser = createAsyncThunk("auth/login",
             const res = await api.post("/auth/login", payload);
             if(!res.data.status) return rejectWithValue(res.data.message);
 
-            localStorage.setItem("token", res.data.data.access_token);
-            return res.data.data.access_token;
-        } catch(err){
+            const token = res.data.data.access_token;
+            const user = res.data.data.user || {};
+            const role = user.role || payload.role || "user";
+            
+            localStorage.setItem("token", token);
+            localStorage.setItem("role", role);
+            
+            return { token, user, role };
+        } catch {
             return rejectWithValue("Login failed");
         }
     }

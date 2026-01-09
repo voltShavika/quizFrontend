@@ -7,6 +7,8 @@ const authSlice = createSlice({
     name: "auth",
     initialState: {
         token,
+        user: null,
+        role: localStorage.getItem("role") || null,
         loading: false,
         error: null,
         success: null
@@ -15,6 +17,8 @@ const authSlice = createSlice({
         logout(state) {
             localStorage.clear();
             state.token = null;
+            state.user = null;
+            state.role = null;
         },
         clearAlert(state) {
             state.error = null;
@@ -28,7 +32,10 @@ const authSlice = createSlice({
         }) 
         .addCase(loginUser.fulfilled, (state, action) => {
             state.loading = false;
-            state.error = action.payload;
+            state.token = action.payload.token;
+            state.user = action.payload.user;
+            state.role = action.payload.role;
+            state.error = null;
         })
         .addCase(loginUser.rejected, (state, action) => {
             state.loading = false;
