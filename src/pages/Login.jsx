@@ -5,7 +5,7 @@ import { Container, Card, Button, Form} from "react-bootstrap"
 import { Link } from "react-router-dom";
 
 export default function Login() {
-    const [form, setForm] = useState({username: "", password: "", role: "user"});
+    const [form, setForm] = useState({username: "", password: ""});
     const dispatch = useDispatch();
     const { loading, error, success} = useSelector((s) => s.auth);
 

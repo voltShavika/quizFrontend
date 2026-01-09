@@ -29,12 +29,15 @@ export const fetchQuizById = createAsyncThunk("user/fetchQuizById",
 
 // Submit quiz attempt
 export const submitQuiz = createAsyncThunk("user/submitQuiz",
-    async ({ quizId, answers }, { rejectWithValue }) => {
+    async ({ quiz_id, answers }, { rejectWithValue }) => {
         try {
-            const res = await api.post(`/quiz/${quizId}/submit`, { answers });
+            console.log("Submitting attempt:", { quiz_id, answers });
+            const res = await api.post(`/attempt`, { quiz_id, answers });
+            console.log("Submit response:", res.data);
             if(!res.data.status) return rejectWithValue(res.data.message);
             return res.data.data;
         } catch (error) {
+            console.error("Submit error:", error.response?.data || error.message);
             return rejectWithValue(error.response?.data?.message || "Failed to submit quiz");
         }
     }
@@ -44,7 +47,8 @@ export const submitQuiz = createAsyncThunk("user/submitQuiz",
 export const getLeaderboard = createAsyncThunk("user/getLeaderboard",
     async (_, { rejectWithValue }) => {
         try {
-            const res = await api.get("/quiz/leaderboard");
+            const res = await api.get("/leaderboard");
+            console.log("Leader board api called", res.data);
             if(!res.data.status) return rejectWithValue(res.data.message);
             return res.data.data;
         } catch (error) {

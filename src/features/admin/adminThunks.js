@@ -5,7 +5,7 @@ import api from "../../api/axios";
 export const createQuiz = createAsyncThunk("admin/createQuiz",
     async (quizData, { rejectWithValue }) => {
         try {
-            const res = await api.post("/quiz/create", quizData);
+            const res = await api.post("/quiz", quizData);
             if(!res.data.status) return rejectWithValue(res.data.message);
             return res.data.data;
         } catch (error) {

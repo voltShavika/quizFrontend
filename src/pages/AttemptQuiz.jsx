@@ -12,7 +12,7 @@ export default function AttemptQuiz() {
     const { currentQuiz, quizResult, loading, error } = useSelector((state) => state.user);
     const { token } = useSelector((state) => state.auth);
     
-    const [answers, setAnswers] = useState({});
+    const [answers, setAnswers] = useState([]);
     const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
@@ -27,19 +27,49 @@ export default function AttemptQuiz() {
         };
     }, [dispatch, quizId, token, navigate]);
 
-    const handleAnswerChange = (questionId, answer) => {
-        setAnswers(prev => ({
-            ...prev,
-            [questionId]: answer
-        }));
+    // Initialize answers array when quiz loads
+    useEffect(() => {
+        if (currentQuiz && currentQuiz.questions) {
+            setAnswers(new Array(currentQuiz.questions.length).fill(""));
+        }
+    }, [currentQuiz]);
+
+    const handleAnswerChange = (questionIndex, answer) => {
+        setAnswers(prev => {
+            // Ensure array is long enough
+            const newAnswers = [...prev];
+            // If array is shorter than needed, extend it
+            while (newAnswers.length <= questionIndex) {
+                newAnswers.push("");
+            }
+            newAnswers[questionIndex] = answer;
+            return newAnswers;
+        });
     };
 
     const handleSubmit = () => {
-        if (Object.keys(answers).length === 0) {
+        const questions = currentQuiz.questions || [];
+        
+        // Ensure answers array matches questions length (fill empty with "")
+        const finalAnswers = questions.map((_, index) => {
+            const answer = answers[index];
+            return answer && answer.trim() ? answer.trim() : "";
+        });
+        
+        // Check if at least one question is answered
+        const validAnswers = finalAnswers.filter(ans => ans && ans.trim());
+        if (validAnswers.length === 0) {
             alert("Please answer at least one question");
             return;
         }
-        dispatch(submitQuiz({ quizId, answers }));
+        
+        console.log("Submitting quiz:", {
+            quiz_id: quizId,
+            answers: finalAnswers,
+            questions: questions.map(q => ({ question: q.question, correct_answer: q.correct_answer }))
+        });
+        
+        dispatch(submitQuiz({ quiz_id: quizId, answers: finalAnswers }));
         setSubmitted(true);
     };
 
@@ -98,15 +128,11 @@ export default function AttemptQuiz() {
     return (
         <Container className="mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h2>{currentQuiz.title || currentQuiz.name || "Quiz"}</h2>
+                <h2>{currentQuiz.title || "Quiz"}</h2>
                 <Button variant="outline-secondary" onClick={handleBack}>
                     Back
                 </Button>
             </div>
-
-            {currentQuiz.description && (
-                <p className="text-muted mb-4">{currentQuiz.description}</p>
-            )}
 
             {error && (
                 <Alert variant="danger">{error}</Alert>
@@ -116,11 +142,10 @@ export default function AttemptQuiz() {
                 <Card.Body>
                     <Form>
                         {questions.map((question, index) => {
-                            const qId = question.id || question._id || index;
                             return (
-                                <div key={qId} className="mb-4">
-                                    <h5>Question {index + 1}: {question.question_text || question.question || question.text}</h5>
-                                    {question.options && question.options.length > 0 ? (
+                                <div key={index} className="mb-4">
+                                    <h5>Question {index + 1}: {question.question}</h5>
+                                    {question.type === "multiple_choice" && question.options && question.options.length > 0 ? (
                                         <div>
                                             {question.options.map((option, optIndex) => {
                                                 const optValue = typeof option === 'string' ? option : option.value || option.text;
@@ -128,12 +153,12 @@ export default function AttemptQuiz() {
                                                     <Form.Check
                                                         key={optIndex}
                                                         type="radio"
-                                                        id={`q${qId}-opt${optIndex}`}
-                                                        name={`question-${qId}`}
+                                                        id={`q${index}-opt${optIndex}`}
+                                                        name={`question-${index}`}
                                                         label={optValue}
                                                         value={optValue}
-                                                        checked={answers[qId] === optValue}
-                                                        onChange={(e) => handleAnswerChange(qId, e.target.value)}
+                                                        checked={answers[index] === optValue}
+                                                        onChange={(e) => handleAnswerChange(index, e.target.value)}
                                                         className="mb-2"
                                                     />
                                                 );
@@ -143,8 +168,8 @@ export default function AttemptQuiz() {
                                         <Form.Control
                                             type="text"
                                             placeholder="Enter your answer"
-                                            value={answers[qId] || ""}
-                                            onChange={(e) => handleAnswerChange(qId, e.target.value)}
+                                            value={answers[index] || ""}
+                                            onChange={(e) => handleAnswerChange(index, e.target.value)}
                                         />
                                     )}
                                 </div>
@@ -160,7 +185,7 @@ export default function AttemptQuiz() {
                                 variant="primary" 
                                 size="lg" 
                                 onClick={handleSubmit}
-                                disabled={Object.keys(answers).length === 0}
+                                disabled={answers.filter(ans => ans && ans.trim()).length === 0}
                             >
                                 Submit Quiz
                             </Button>

@@ -10,7 +10,7 @@ export const loginUser = createAsyncThunk("auth/login",
 
             const token = res.data.data.access_token;
             const user = res.data.data.user || {};
-            const role = user.role || payload.role || "user";
+            const role = res.data.data.role || "user";
             
             localStorage.setItem("token", token);
             localStorage.setItem("role", role);

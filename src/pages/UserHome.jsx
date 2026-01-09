@@ -65,12 +65,11 @@ export default function UserHome() {
                     {quizzes.map((quiz) => (
                         <ListGroup.Item key={quiz.id || quiz._id} className="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5>{quiz.title || quiz.name}</h5>
-                                <p className="mb-0 text-muted">
-                                    {quiz.description || "No description available"}
-                                </p>
-                                {quiz.duration && (
-                                    <small className="text-muted">Duration: {quiz.duration} minutes</small>
+                                <h5>{quiz.title}</h5>
+                                {quiz.questions && (
+                                    <small className="text-muted">
+                                        {quiz.questions.length} question{quiz.questions.length !== 1 ? 's' : ''}
+                                    </small>
                                 )}
                             </div>
                             <Button 
