@@ -5,6 +5,7 @@ export const loginUser = createAsyncThunk("auth/login",
     async (payload, { rejectWithValue }) => {
         try {
             const res = await api.post("/auth/login", payload);
+            console.log(res.data);
             if(!res.data.status) return rejectWithValue(res.data.message);
 
             const token = res.data.data.access_token;

@@ -5,7 +5,7 @@ import api from "../../api/axios";
 export const fetchQuizzes = createAsyncThunk("user/fetchQuizzes",
     async (_, { rejectWithValue }) => {
         try {
-            const res = await api.get("/quiz/list");
+            const res = await api.get("/quiz");
             if(!res.data.status) return rejectWithValue(res.data.message);
             return res.data.data;
         } catch (error) {
